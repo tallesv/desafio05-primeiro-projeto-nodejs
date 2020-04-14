@@ -6,6 +6,12 @@ interface Balance {
   total: number;
 }
 
+interface CreateTransactionTDO {
+  title: string;
+  value: number;
+  type: 'income' | 'outcome';
+}
+
 class TransactionsRepository {
   private transactions: Transaction[];
 
@@ -14,15 +20,35 @@ class TransactionsRepository {
   }
 
   public all(): Transaction[] {
-    // TODO
+    return this.transactions;
   }
 
   public getBalance(): Balance {
-    // TODO
+    const income = this.transactions.reduce(
+      (previousValue, transaction) =>
+        transaction.type === 'income'
+          ? previousValue + transaction.value
+          : 0 + previousValue,
+      0,
+    );
+    const outcome = this.transactions.reduce(
+      (previousValue, transaction) =>
+        transaction.type === 'outcome'
+          ? previousValue + transaction.value
+          : 0 + previousValue,
+      0,
+    );
+
+    return { income, outcome, total: income - outcome };
   }
 
-  public create(): Transaction {
-    // TODO
+  public create({ title, value, type }: CreateTransactionTDO): Transaction {
+    if (type === 'income' || type === 'outcome') {
+      const transaction = new Transaction({ title, value, type });
+      this.transactions.push(transaction);
+      return transaction;
+    }
+    throw Error('invalid type.');
   }
 }
 
